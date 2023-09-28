@@ -163,13 +163,6 @@ class GameScene extends Scene {
       }
     });
 
-    const debugGraphics = this.add.graphics().setAlpha(0.75);
-    floorLayer.renderDebug(debugGraphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    });
-
     this.anims.create({
       key: "cat-idle",
       frameRate: 6,
@@ -278,7 +271,6 @@ new Phaser.Game({
     default: "arcade",
     arcade: {
       gravity: { y: 400 },
-      debug: true,
     },
   },
   antialias: false,
