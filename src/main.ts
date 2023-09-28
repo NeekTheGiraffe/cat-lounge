@@ -1,5 +1,8 @@
 import Phaser, { Scene } from "phaser";
 import "./style.css";
+import Cat from "./Cat";
+
+import KeyCodes = Phaser.Input.Keyboard.KeyCodes;
 
 const jumpStrength = 320;
 const catSpeed = 200;
@@ -39,17 +42,12 @@ const replaceTileWithSprite = (
 };
 
 class GameScene extends Scene {
-  private cat: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | undefined;
-  // private floor: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | undefined;
+  private cats: Cat[] = [];
   private keyboard: Record<string, Phaser.Input.Keyboard.Key>;
-  private catGrounded: boolean;
-  private catBusy: boolean;
 
   constructor() {
     super("Game");
     this.keyboard = {};
-    this.catGrounded = false;
-    this.catBusy = false;
   }
 
   // init(data: object) {}
@@ -183,85 +181,60 @@ class GameScene extends Scene {
       repeatDelay: 2000,
     });
 
-    this.cat = this.physics.add
-      .sprite(30, 230, "cat")
-      .setCollideWorldBounds(true);
-    this.cat.name = "cat";
-    this.cat.setOrigin(0, 1);
-    this.cat.body
-      .setSize(this.cat.displayWidth / 3, this.cat.displayHeight / 4)
-      .setOffset(this.cat.displayWidth / 3, (this.cat.displayHeight * 3) / 4);
-
-    this.physics.add.collider(this.cat, wallsGroup);
-    this.physics.add.collider(this.cat, floorLayer, (obj1, obj2) => {
-      const o1 = obj1 as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-      const o2 = obj2 as Phaser.Tilemaps.Tile;
-      if (o1.body.bottom < o2.bottom) {
-        this.catGrounded = true;
-      }
-    });
-    this.physics.add.collider(this.cat, furnitureGroup, (obj1, obj2) => {
-      const o1 = obj1 as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-      const o2 = obj2 as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-      if (o1.body.bottom < o2.body.bottom) {
-        this.catGrounded = true;
-      }
-    });
-
     this.addKeys(["W", "A", "S", "D", "E"]);
+    this.addKeys([
+      KeyCodes.UP,
+      KeyCodes.LEFT,
+      KeyCodes.DOWN,
+      KeyCodes.RIGHT,
+      KeyCodes.COMMA,
+    ]);
 
-    this.cat.on("animationcomplete", (anim: Phaser.Animations.Animation) => {
-      if (anim.key === "cat-paw") {
-        this.catBusy = false;
-        this.cat!.play("cat-idle");
-      }
-    });
+    this.cats.push(
+      new Cat(
+        this,
+        30,
+        230,
+        catSpeed,
+        jumpStrength,
+        [wallsGroup],
+        [floorLayer, furnitureGroup],
+        {
+          jump: "W",
+          moveLeft: "A",
+          sleep: "S",
+          moveRight: "D",
+          paw: "E",
+        },
+      ),
+      new Cat(
+        this,
+        400,
+        100,
+        catSpeed,
+        jumpStrength,
+        [wallsGroup],
+        [floorLayer, furnitureGroup],
+        {
+          jump: KeyCodes.UP,
+          moveLeft: KeyCodes.LEFT,
+          sleep: KeyCodes.DOWN,
+          moveRight: KeyCodes.RIGHT,
+          paw: KeyCodes.COMMA,
+        },
+      ),
+    );
   }
 
   update() {
-    if (!this.cat) throw new Error("Game objects not initialized properly");
+    if (this.cats.length !== 2)
+      throw new Error("Game objects not initialized properly");
 
-    if (this.keyboard["A"].isDown && !this.keyboard["D"].isDown) {
-      this.cat.setVelocityX(-catSpeed);
-      this.cat.flipX = true;
-      if (this.catGrounded) {
-        this.cat.play("cat-walk", true);
-        this.catBusy = false;
-      }
-    } else if (this.keyboard["D"].isDown && !this.keyboard["A"].isDown) {
-      this.cat.setVelocityX(catSpeed);
-      this.cat.flipX = false;
-      if (this.catGrounded) {
-        this.cat.play("cat-walk", true);
-        this.catBusy = false;
-      }
-    } else {
-      this.cat.setVelocityX(0);
-      if (this.catGrounded && !this.catBusy) this.cat.play("cat-idle", true);
-    }
-
-    if (this.keyboard["E"].isDown && this.catGrounded) {
-      this.cat.play("cat-paw", true);
-      this.catBusy = true;
-    }
-
-    if (this.keyboard["S"].isDown && this.catGrounded) {
-      this.cat.play("cat-sleep", true);
-      this.catBusy = true;
-    }
-
-    if (this.keyboard["W"].isDown && this.catGrounded) {
-      this.cat.setVelocity(-jumpStrength).play("cat-jump");
-    }
-
-    if (this.cat.body.velocity.y > 0) {
-      this.cat.setFrame(68);
-    }
-
-    this.catGrounded = false;
+    this.cats.forEach((cat) => cat.handleInput(this.keyboard));
+    this.cats.forEach((cat) => cat.update());
   }
 
-  addKeys(keys: string[]) {
+  addKeys(keys: (string | number)[]) {
     if (!this.input.keyboard) return;
 
     for (const key of keys) {
