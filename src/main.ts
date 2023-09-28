@@ -135,6 +135,32 @@ class GameScene extends Scene {
           },
         );
       }
+      if (tile.properties.chair_left_facing) {
+        replaceTileWithSprite(
+          tile,
+          furnitureGroup,
+          furnitureBaseLayer,
+          "tile_indoors",
+          {
+            size: [28, 6],
+            offset: [14, 10],
+            checkCollision: { down: false, left: false, right: false },
+          },
+        );
+      }
+      if (tile.properties.chair_right_facing) {
+        replaceTileWithSprite(
+          tile,
+          furnitureGroup,
+          furnitureBaseLayer,
+          "tile_indoors",
+          {
+            size: [28, 6],
+            offset: [-10, 10],
+            checkCollision: { down: false, left: false, right: false },
+          },
+        );
+      }
     });
 
     const debugGraphics = this.add.graphics().setAlpha(0.75);

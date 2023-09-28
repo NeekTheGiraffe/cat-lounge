@@ -359,6 +359,24 @@
                          "type":"bool",
                          "value":true
                         }]
+                }, 
+                {
+                 "id":107,
+                 "properties":[
+                        {
+                         "name":"chair_right_facing",
+                         "type":"bool",
+                         "value":true
+                        }]
+                }, 
+                {
+                 "id":112,
+                 "properties":[
+                        {
+                         "name":"chair_left_facing",
+                         "type":"bool",
+                         "value":true
+                        }]
                 }],
          "tilewidth":32
         }, 
