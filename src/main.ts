@@ -7,6 +7,13 @@ import KeyCodes = Phaser.Input.Keyboard.KeyCodes;
 const jumpStrength = 320;
 const catSpeed = 200;
 
+const getAssetUrl = (url: string) => {
+  const baseUrl = import.meta.env.BASE_URL;
+  if (baseUrl[baseUrl.length - 1] === "/")
+    return `${baseUrl.substring(0, baseUrl.length - 1)}${url}`;
+  return `${baseUrl}${url}`;
+};
+
 const replaceTileWithSprite = (
   tile: Phaser.Tilemaps.Tile,
   group: Phaser.Physics.Arcade.StaticGroup,
@@ -54,14 +61,19 @@ class GameScene extends Scene {
   init() {}
 
   preload() {
-    this.load.spritesheet("cat", "/output.png", { frameWidth: 96, spacing: 4 });
+    this.load.spritesheet("cat", getAssetUrl("/output.png"), {
+      frameWidth: 96,
+      spacing: 4,
+    });
 
-    this.load.tilemapTiledJSON("map", "/room.tmj");
-    this.load.spritesheet("tile_indoors", "/obj_indoors.png", {
+    this.load.tilemapTiledJSON("map", getAssetUrl("/room.tmj"));
+    this.load.spritesheet("tile_indoors", getAssetUrl("/obj_indoors.png"), {
       frameWidth: 32,
     });
-    this.load.spritesheet("tile_room", "/tile_room.png", { frameWidth: 32 });
-    this.load.image("tile_wall", "/tile_wall.png");
+    this.load.spritesheet("tile_room", getAssetUrl("/tile_room.png"), {
+      frameWidth: 32,
+    });
+    this.load.image("tile_wall", getAssetUrl("/tile_wall.png"));
   }
 
   create() {
